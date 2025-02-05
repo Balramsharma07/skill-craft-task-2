@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .stopwatch-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #display {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #laps {
+            margin-top: 20px;
+            list-style: none;
+            padding: 0;
+        }
+
+        #laps li {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stopwatch-container">
+        <div id="display">00:00:00</div>
+        <button id="startStop">Start</button>
+        <button id="lap">Lap</button>
+        <button id="reset">Reset</button>
+
+        <ul id="laps"></ul>
+    </div>
+
+
+    <script>
+        let startTime = 0;
+        let running = false;
+        let lapTimes = [];
+
+        const display = document.getElementById('display');
+        const startStopButton = document.getElementById('startStop');
+        const lapButton = document.getElementById('lap');
+        const resetButton = document.getElementById('reset');
+        const lapsList = document.getElementById('laps');
+
+        function updateDisplay() {
+            const currentTime = Date.now() - startTime;
+            const formattedTime = formatTime(currentTime);
+            display.textContent = formattedTime;
+        }
+
+        function formatTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const centiseconds = Math.floor((milliseconds % 1000) / 10);
+
+            return ${pad(minutes)}:${pad(seconds)}:${pad(centiseconds)};
+        }
+
+        function pad(number) {
+            return number < 10 ? '0' + number : number;
+        }
+
+        let timerInterval;
+
+        startStopButton.addEventListener('click', () => {
+            if (!running) {
+                startTime = Date.now() - (startTime ? (Date.now() - startTime) : 0) ; // Adjust start time if already paused
+                timerInterval = setInterval(updateDisplay, 10);
+                startStopButton.textContent = 'Pause';
+                running = true;
+            } else {
+                clearInterval(timerInterval);
+                startStopButton.textContent = 'Start';
+                running = false;
+            }
+        });
+
+        lapButton.addEventListener('click', () => {
+            if (running) {
+                const currentTime = Date.now() - startTime;
+                const formattedTime = formatTime(currentTime);
+                lapTimes.push(formattedTime);
+                const lapItem = document.createElement('li');
+                lapItem.textContent = formattedTime;
+                lapsList.appendChild(lapItem);
+            }
+        });
+
+        resetButton.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            running = false;
+            startTime = 0;
+            display.textContent = '00:00:00';
+            startStopButton.textContent = 'Start';
+            lapTimes = [];
+            lapsList.innerHTML = ''; // Clear lap list
+        });
+    </script>
+
+</body>
+</html>
